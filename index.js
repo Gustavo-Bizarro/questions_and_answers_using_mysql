@@ -41,7 +41,7 @@ app.get("/",(req,res) => {
 //rotas
 app.get("/perguntar",(req,res) => {
     res.render("perguntar");
-})
+});
 //Receber os dados do formulario
 app.post("/salvarpergunta",(req,res) => {
     //recebendo os dados do formulario
@@ -53,6 +53,21 @@ titulo: titulo,
 descricao: descricao
     }).then(()=> {
         res.redirect("/")
+    })
+});
+
+app.get("/pergunta/:id",(req,res)=>{
+    var id = req.params.id;
+    Pergunta.findOne({
+        where: {id: id}
+    }).then(pergunta => {
+        if(pergunta != undefined){//pergunta encontrada
+            res.render("pergunta",{
+                pergunta: pergunta
+            })
+        }else{//pergunta não encontrada
+            res.redirect("/");
+        }
     })
 })
 
