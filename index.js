@@ -8,6 +8,8 @@ const bodyParser = require("body-parser");
 const connection = require("./database/database");
 //importando o model da tabela
 const Pergunta = require("./database/pergunta");
+//importando model de resposta
+const Resposta = require("./database/Resposta");
 //database
 connection
          .authenticate()
@@ -62,14 +64,34 @@ app.get("/pergunta/:id",(req,res)=>{
         where: {id: id}
     }).then(pergunta => {
         if(pergunta != undefined){//pergunta encontrada
-            res.render("pergunta",{
-                pergunta: pergunta
-            })
+
+            Resposta.findAll({
+                where: {perguntaId: pergunta.id},
+                order:[['id','DESC' ]]
+            }).then(respostas => {
+                res.render("pergunta",{
+                    pergunta: pergunta,
+                    respostas: respostas
+                });
+            });
+
         }else{//pergunta não encontrada
             res.redirect("/");
         }
     })
 })
+
+//rota para respostas
+app.post("/responder", (req, res) => {
+    var corpo = req.body.corpo;
+    var perguntaId = req.body.pergunta;
+    Resposta.create({
+        corpo: corpo,
+        perguntaId: perguntaId
+    }).then(()=> {
+        res.redirect("/pergunta/" + perguntaId);
+    })
+});
 
 //rodar a aplicação
 app.listen(8080,()=>{
